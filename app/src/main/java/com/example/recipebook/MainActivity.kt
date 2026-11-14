@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -73,13 +72,9 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = { Text("Книга рецептов") },
-                            navigationIcon = {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Меню")
-                                }
-                            },
-                            // 👇 ВОТ ЗДЕСЬ МЫ ДОБАВИЛИ СЕРДЕЧКО В ПРАВЫЙ УГОЛ 👇
+
                             actions = {
+
                                 IconButton(onClick = { navController.navigate("favorites") }) {
                                     Icon(Icons.Default.Favorite, contentDescription = "Избранное")
                                 }

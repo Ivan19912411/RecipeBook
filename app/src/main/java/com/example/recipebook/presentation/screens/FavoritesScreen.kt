@@ -10,27 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.recipebook.presentation.viewmodel.RecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(viewModel: RecipeViewModel, onRecipeClick: (String) -> Unit, onBack: () -> Unit) {
     val favorites by viewModel.favorites.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Избранное") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Text("Назад") }
-                }
-            )
-        }
-    ) { padding ->
+    Column(modifier = Modifier.fillMaxSize()) {
         if (favorites.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("Нет избранных рецептов")
             }
         } else {
-            LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(favorites) { recipe ->
                     RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
                 }
