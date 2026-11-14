@@ -77,6 +77,12 @@ class MainActivity : ComponentActivity() {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                     Icon(Icons.Default.Menu, contentDescription = "Меню")
                                 }
+                            },
+                            // 👇 ВОТ ЗДЕСЬ МЫ ДОБАВИЛИ СЕРДЕЧКО В ПРАВЫЙ УГОЛ 👇
+                            actions = {
+                                IconButton(onClick = { navController.navigate("favorites") }) {
+                                    Icon(Icons.Default.Favorite, contentDescription = "Избранное")
+                                }
                             }
                         )
                     }

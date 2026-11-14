@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.recipebook.presentation.viewmodel.RecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailScreen(viewModel: RecipeViewModel, recipeId: String, onBack: () -> Unit) {
     val recipe by viewModel.selectedRecipe.collectAsState()
@@ -26,47 +25,61 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, recipeId: String, onBack: () 
         viewModel.loadRecipeDetails(recipeId)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(recipe?.name ?: "Загрузка...") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Text("Назад") }
-                }
-            )
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-    ) { padding ->
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+    } else if (recipe != null) {
+        val r = recipe!!
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Кнопка Назад
+            TextButton(onClick = onBack) {
+                Text("← Назад")
             }
-        } else if (recipe != null) {
-            val r = recipe!!
-            Column(modifier = Modifier.padding(padding).padding(16.dp).fillMaxSize().verticalScroll(rememberScrollState())) {
-                AsyncImage(
-                    model = r.imageUrl,
-                    contentDescription = r.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().height(250.dp)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            AsyncImage(
+                model = r.imageUrl,
+                contentDescription = r.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(250.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 👇 Ряд с названием и сердечком 👇
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = r.name,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f) // <-- ВАЖНО: не дает тексту выдавить сердечко
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = r.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    IconButton(onClick = { viewModel.toggleFavorite(r) }) {
-                        Icon(
-                            imageVector = if (r.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "В избранное",
-                            tint = if (r.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                IconButton(onClick = { viewModel.toggleFavorite(r) }) {
+                    Icon(
+                        imageVector = if (r.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "В избранное",
+                        tint = if (r.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Категория: ${r.category}", style = MaterialTheme.typography.bodyLarge)
-                Text(text = "Кухня: ${r.area}", style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Инструкция:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = r.instructions, style = MaterialTheme.typography.bodyMedium)
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Категория: ${r.category}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Кухня: ${r.area}", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Инструкция:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = r.instructions, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
