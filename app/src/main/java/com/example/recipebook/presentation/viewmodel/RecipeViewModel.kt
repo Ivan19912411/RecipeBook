@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipebook.domain.model.Recipe
 import com.example.recipebook.domain.repository.RecipeRepository
+import com.example.recipebook.domain.usecase.GetInitialRecipesUseCase
 import com.example.recipebook.domain.usecase.GetRecipeDetailsUseCase
 import com.example.recipebook.domain.usecase.GetRecipesUseCase
 import com.example.recipebook.domain.usecase.ToggleFavoriteUseCase
@@ -15,6 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val getRecipesUseCase: GetRecipesUseCase,
+    private val getInitialRecipesUseCase: GetInitialRecipesUseCase, // 👈 Добавили
     private val getRecipeDetailsUseCase: GetRecipeDetailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val repository: RecipeRepository
@@ -40,6 +42,21 @@ class RecipeViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
+    }
+
+    // 👇 Новая функция для автозагрузки 👇
+    fun loadInitialRecipes() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                _recipes.value = getInitialRecipesUseCase()
+            } catch (e: Exception) {
+                _error.value = "Ошибка загрузки: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     fun searchRecipes() {

@@ -20,6 +20,34 @@ class RecipeRepositoryImpl @Inject constructor(
         } ?: emptyList()
     }
 
+    // 👇 Этот метод скачивает рецепты на буквы a, b, c, d, e, f 👇
+    override suspend fun getInitialRecipes(): List<Recipe> {
+        val result = mutableListOf<Recipe>()
+        val letters = listOf("a", "b", "c", "d", "e", "f")
+
+        for (letter in letters) {
+            try {
+                val response = api.searchRecipesByLetter(letter)
+                response.meals?.forEach { dto ->
+                    result.add(
+                        Recipe(
+                            id = dto.id,
+                            name = dto.name,
+                            category = dto.category ?: "",
+                            area = dto.area ?: "",
+                            instructions = dto.instructions ?: "",
+                            imageUrl = dto.imageUrl ?: "",
+                            isFavorite = isFavorite(dto.id)
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+
+            }
+        }
+        return result.distinctBy { it.id }
+    }
+
     override suspend fun getRecipeDetails(id: String): Recipe? {
         val dto = api.getRecipeDetails(id).meals?.firstOrNull() ?: return null
         return Recipe(dto.id, dto.name, dto.category ?: "", dto.area ?: "", dto.instructions ?: "", dto.imageUrl ?: "", isFavorite(id))

@@ -3,6 +3,9 @@ package com.example.recipebook.presentation.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -11,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,6 +31,17 @@ fun RecipeListScreen(viewModel: RecipeViewModel, onRecipeClick: (String) -> Unit
     val searchQuery by viewModel.searchQuery.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
+    // 👇 ВОТ ТУТ МЫ ВКЛЮЧАЕМ АВТОЗАГРУЗКУ ПРИ СТАРТЕ 👇
+    LaunchedEffect(Unit) {
+        if (recipes.isEmpty()) {
+            viewModel.loadInitialRecipes() // Загружаем пачку рецептов
+        }
+    }
+    // 👆 --------------------------------------------- 👆
 
     Column(modifier = Modifier.fillMaxSize()) {
         OutlinedTextField(
@@ -58,9 +73,22 @@ fun RecipeListScreen(viewModel: RecipeViewModel, onRecipeClick: (String) -> Unit
                 Text("Введите запрос и нажмите 'Найти'")
             }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(recipes) { recipe ->
-                    RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
+            if (isLandscape) {
+                // Альбомная ориентация (сетка 2 колонки)
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(recipes) { recipe ->
+                        RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
+                    }
+                }
+            } else {
+                // Портретная ориентация (список)
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(recipes) { recipe ->
+                        RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) })
+                    }
                 }
             }
         }
