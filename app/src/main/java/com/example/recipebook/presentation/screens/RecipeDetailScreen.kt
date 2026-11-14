@@ -37,12 +37,6 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, recipeId: String, onBack: () 
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Кнопка Назад
-            TextButton(onClick = onBack) {
-                Text("← Назад")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             AsyncImage(
                 model = r.imageUrl,
@@ -53,7 +47,7 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, recipeId: String, onBack: () 
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 👇 Ряд с названием и сердечком 👇
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -63,7 +57,7 @@ fun RecipeDetailScreen(viewModel: RecipeViewModel, recipeId: String, onBack: () 
                     text = r.name,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f) // <-- ВАЖНО: не дает тексту выдавить сердечко
+                    modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = { viewModel.toggleFavorite(r) }) {
                     Icon(
