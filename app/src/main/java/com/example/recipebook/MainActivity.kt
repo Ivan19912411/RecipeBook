@@ -4,44 +4,88 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.recipebook.ui.theme.RecipeBookTheme
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+// 👇 ВОТ ЭТА СТРОЧКА РАЗРЕШАЕТ ИСПОЛЬЗОВАНИЕ ЭКСПЕРИМЕНТАЛЬНЫХ API 👇
+@OptIn(ExperimentalMaterial3Api::class)
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            RecipeBookTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+            val navController = rememberNavController()
+            val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+            val scope = rememberCoroutineScope()
+
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet {
+                        Spacer(Modifier.height(16.dp))
+                        Text("Книга рецептов", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineSmall)
+                        NavigationDrawerItem(
+                            label = { Text("Все рецепты") },
+                            icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                            selected = false,
+                            onClick = {
+                                navController.navigate("home")
+                                scope.launch { drawerState.close() }
+                            },
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        NavigationDrawerItem(
+                            label = { Text("Избранное") },
+                            icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                            selected = false,
+                            onClick = {
+                                navController.navigate("favorites")
+                                scope.launch { drawerState.close() }
+                            },
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            ) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Книга рецептов") },
+                            navigationIcon = {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Меню")
+                                }
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home",
                         modifier = Modifier.padding(innerPadding)
-                    )
+                    ) {
+                        composable("home") {
+                            Text("Экран рецептов (В разработке)", modifier = Modifier.padding(16.dp))
+                        }
+                        composable("favorites") {
+                            Text("Экран избранного (В разработке)", modifier = Modifier.padding(16.dp))
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    RecipeBookTheme {
-        Greeting("Android")
     }
 }
